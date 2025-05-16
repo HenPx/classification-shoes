@@ -1,0 +1,8 @@
+numpy==2.2.5
+opencv_contrib_python==4.11.0.86
+opencv_python==4.10.0.84
+Pillow==9.5.0
+Pillow==11.2.1
+plotly==5.23.0
+streamlit==1.38.0
+streamlit_option_menu==0.3.6

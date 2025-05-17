@@ -187,7 +187,7 @@ def create_classification_menu(model, scaler, le):
                         st.session_state['get_label'][i:i+cols_per_row]
                     )):
                         with cols[j]:
-                            st.image(file, caption=f"Prediksi: {label}", use_container_width=True)
+                            st.image(file, caption=f"Prediksi: {label}")
         else:
             st.warning("Tidak ada gambar yang akan diproses.")
 

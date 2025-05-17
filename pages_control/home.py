@@ -36,15 +36,15 @@ def create_home_menu():
     with col1:
         
         # image_sandal = Image.open("images/sandal.jpg")
-        st.image("images/sandal.jpg", caption="Sandal", use_container_width=True)
+        st.image("images/sandal.jpg", caption="Sandal")
 
     with col2:
         # image_shoes = Image.open("images/shoe.jpg")
-        st.image("images/shoe.jpg", caption="Shoes", use_container_width=True)
+        st.image("images/shoe.jpg", caption="Shoes")
 
     with col3:
         # image_boots = Image.open("images/boot.jpg")
-        st.image("images/boot.jpg", caption="Boots", use_container_width=True)
+        st.image("images/boot.jpg", caption="Boots")
 
     st.markdown("""
     ✨ **Selamat menjelajahi aplikasi ini!** Jangan ragu untuk mencoba berbagai fitur dan lihat hasil klasifikasi dataset sepatu, boots, dan sandal.

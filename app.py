@@ -4,16 +4,18 @@ from components.option_menu import create_option_menu
 from pages_control.home import create_home_menu
 from pages_control.about import create_about_menu
 from pages_control.classification import create_classification_menu
+from utils.svm_rbf_manual import ManualSVM
+
+
 # load the model
-with open('utils/svm_rbf.pkl', 'rb') as file:
+ManualSVM()
+with open('utils/svmmodel (2).pkl', 'rb') as file:
     model = pickle.load(file)
+with open("utils/scaler.pkl", "rb") as f:
+    scaler = pickle.load(f)
+with open("utils/label_encoder.pkl", "rb") as f:
+    le = pickle.load(f)
     
-# Extract model parameters
-alpha = model["alpha"]
-b = model["b"]
-X_train = model["X_train"]
-y_train = model["y_train"]
-gamma = model["gamma"]
 
 def main():
     
@@ -47,36 +49,10 @@ def main():
     if selected == "Beranda":
         create_home_menu()
     elif selected == "Proses Klasifikasi":
-        create_classification_menu(model, alpha, b, X_train, y_train, gamma)
+        create_classification_menu(model, scaler, le)
     elif selected == "Tentang Kami":  
         create_about_menu()
             
 if __name__ == "__main__":
     main()
-    
-    
-
-# with open('utils/svm_ini_brow.pkl', 'rb') as file:
-#     model_baru = pickle.load(file)
-
-
-# value_predict = st.text_input("Masukkan nilai prediksi", "0")
-
-# # buat value menjadi inputan array 331.3830586	6.060346949	0.578375676	0.200768492	0.448071972	0.981726384	947.6120652	11.14669229	0.543731208	0.193243306	0.439594479	0.947920049	380.4293799	7.262549213	0.579570426	0.201623395	0.449024938	0.979021098	303.006448	6.285510571	0.557020349	0.19485555	0.441424455	0.983347024
-# split = []
-# split = value_predict.split("\t")
-# # ubah string jadi array numpy dan reshape
-# st.write(split)
-# print(split)
-
-# test = np.array(split, dtype=float)
-# test = test.reshape(1, -1)
-
-# categories = ["Boot", "Sandal", "Shoe"]  # Jangan pakai 'class'
-
-# # Prediksi saat tombol diklik
-# if st.button("Prediksi", key="but_predict"):
-#     prediction = model_baru.predict(test)  # pastikan model_baru sudah di-load
-#     predicted_class = categories[prediction[0]]  # indeks ke nama kelas
-#     st.write(f"Prediksi: {predicted_class}")
     

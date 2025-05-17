@@ -1,54 +1,75 @@
+import cv2
 import numpy as np
-def compute_glcm(image, distance=1, angle=0):
-    """
-    Fungsi ini menghitung GLCM untuk satu arah dan satu jarak secara manual.
-    Hanya mendukung citra grayscale dalam format numpy array.
-    """
-    rows, cols = image.shape
-    levels = 256  # Untuk 8-bit grayscale
+import streamlit as st
 
-    # Matriks GLCM
+# Asumsikan df sudah ada, dengan kolom 'path' dan 'label'
+# Contoh: df = pd.DataFrame({'path': [...], 'label': [...])
+
+# Fungsi buat GLCM manual
+def compute_glcm_manual(image, dx, dy, levels=256):
     glcm = np.zeros((levels, levels), dtype=np.uint32)
 
-    # Arah: angle 0 derajat (horizontal)
-    dr, dc = 0, distance
+    rows, cols = image.shape
 
-    for r in range(rows):
-        for c in range(cols - distance):
-            i = int(image[r, c])
-            j = int(image[r + dr, c + dc])
-            glcm[i, j] += 1
+    # Tentukan batas i dan j agar tidak out of bounds
+    if dy >= 0:
+        i_range = range(rows - dy)
+    else:
+        i_range = range(-dy, rows)
 
-    # Normalisasi
-    glcm = glcm / glcm.sum()
-    return glcm
+    if dx >= 0:
+        j_range = range(cols - dx)
+    else:
+        j_range = range(-dx, cols)
 
-def extract_glcm_features(image):
-    """
-    Menghitung fitur statistik dari GLCM:
-    - Contrast
-    - Homogeneity
-    - Energy
-    - Correlation
-    """
-    glcm = compute_glcm(image)
+    for i in i_range:
+        for j in j_range:
+            row_val = image[i, j]
+            col_val = image[i + dy, j + dx]
+            glcm[row_val, col_val] += 1
+
+    return glcm + glcm.T  # Buat symmetric (optional)
+
+# Fungsi hitung fitur dari GLCM
+def compute_glcm_features(glcm):
+    glcm = glcm.astype(np.float64)
+    glcm_sum = glcm.sum()
+    if glcm_sum == 0:
+        return [0] * 6
+    glcm /= glcm_sum  # Normalisasi
 
     levels = glcm.shape[0]
-    i, j = np.indices((levels, levels))
+    i, j = np.meshgrid(np.arange(levels), np.arange(levels), indexing='ij')
 
-    contrast = np.sum(glcm * (i - j) ** 2)
-    homogeneity = np.sum(glcm / (1.0 + np.abs(i - j)))
-    energy = np.sum(glcm ** 2)
+    contrast = np.sum((i - j) ** 2 * glcm)
+    dissimilarity = np.sum(np.abs(i - j) * glcm)
+    homogeneity = np.sum(glcm / (1.0 + (i - j) ** 2))
+    asm = np.sum(glcm ** 2)
+    energy = np.sqrt(asm)
 
-    # Menghindari pembagian dengan nol
-    mean_i = np.sum(i * glcm)
-    mean_j = np.sum(j * glcm)
-    std_i = np.sqrt(np.sum(((i - mean_i) ** 2) * glcm))
-    std_j = np.sqrt(np.sum(((j - mean_j) ** 2) * glcm))
-
-    if std_i * std_j == 0:
-        correlation = 1.0
+    mi = np.sum(i * glcm)
+    mj = np.sum(j * glcm)
+    si = np.sqrt(np.sum((i - mi) ** 2 * glcm))
+    sj = np.sqrt(np.sum((j - mj) ** 2 * glcm))
+    if si > 0 and sj > 0:
+        correlation = np.sum((i - mi) * (j - mj) * glcm) / (si * sj)
     else:
-        correlation = np.sum(((i - mean_i) * (j - mean_j) * glcm)) / (std_i * std_j)
+        correlation = 0
 
-    return np.array([contrast, homogeneity, energy, correlation])
+    return [contrast, dissimilarity, homogeneity, asm, energy, correlation]
+
+# Arah GLCM manual: (dx, dy)
+directions = {
+    '0': (1, 0),
+    '45': (1, -1),
+    '90': (0, 1),
+    '135': (-1, -1)
+}
+def get_feat(image):
+    features = []
+    for suffix, (dx, dy) in directions.items():
+        glcm = compute_glcm_manual(image, dx, dy)
+        contrast, dissimilarity, homogeneity, asm, energy, correlation = compute_glcm_features(glcm)
+        features.extend([contrast, dissimilarity, homogeneity, asm, energy, correlation])
+    
+    return np.array(features)

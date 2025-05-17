@@ -4,7 +4,7 @@ from PIL import Image
 import cv2
 from zipfile import ZipFile
 from io import BytesIO
-from utils.feat_glcm import compute_glcm, extract_glcm_features
+from utils.feat_glcm import get_feat
 from utils.rbf_svm import predict_svm_rbf
 
 
@@ -19,7 +19,7 @@ def extract_zip_to_state(zip_file):
                     uploaded_files.append(file_data)
     st.session_state['uploaded_files'] = uploaded_files
 
-def create_classification_menu(model, alpha, b, X_train, y_train, gamma):
+def create_classification_menu(model, scaler, le):
     #load model
     model = model
     
@@ -60,33 +60,42 @@ def create_classification_menu(model, alpha, b, X_train, y_train, gamma):
                 if st.button("Mulai Preprocessing", key="but_start_preprocessing"):
                     st.session_state['open_selected_image'] = False
                     st.session_state['preprocessing'] = True
-                    # Extract GLCM features for each image
-                    cols_per_row = 7  # Jumlah gambar per baris
+                    cols_per_row = 7  
                     files = st.session_state['uploaded_files']
+                    total_files = len(files)
+                    progress_bar = st.progress(0)
                     
                     for i in range(0, len(files), cols_per_row):
                         cols = st.columns(cols_per_row)
                         for j, file in enumerate(files[i:i+cols_per_row]):
                             with cols[j]:
                                 image = Image.open(file)
+                                # glcm = compute_glcm(image)
                                 image = np.array(image)
-                                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                                gray = cv2.resize(gray, (128, 128))
-                                gray = cv2.equalizeHist(gray)
-                                gray = cv2.GaussianBlur(gray, (3, 3), 0)
-                                st.image(gray)
-                                gray = gray.astype(np.float32) / 255.0
-                                gray = (gray * 255).astype(np.uint8)
+            
+                                # Pastikan gambar menjadi grayscale
+                                if len(image.shape) == 3:
+                                    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                                
+                                # Resize ke 128x128
+                                image = cv2.resize(image, (128, 128))
 
-                                glcm = compute_glcm(gray)
-                                features = extract_glcm_features(glcm)
-                                st.write("Fitur GLCM:")
-                                st.write(", ".join([f"{v:.3f}" for v in features.flatten()]))
-                                features = features.reshape(1, -1)
-
-                                prediction = predict_svm_rbf(X_train, y_train, features, alpha, b, gamma)
-                                label = "Boot" if prediction[0] == 1 else "Not Boot"
+                                st.image(image)
+                                features = get_feat(image)
+                                # st.write(features)
+                                # predict = model.predict(features)
+                                # st.write(predict)
+                                features_scaled = scaler.transform([features])
+                                pred = model.predict(features_scaled)
+                                label = le.inverse_transform(pred)[0]
+                                # st.write(label)
+                                # st.write("Fitur GLCM:")
+                                # st.write(", ".join([f"{v:.3f}" for v in features.flatten()]))
+                                # features = features.reshape(1, -1)
                                 st.session_state['get_label'].append(label)
+                                processed_files = i + j + 1
+                                progress = int((processed_files / total_files) * 100)
+                                progress_bar.progress(progress)
                     
     with tabs [1]:
         if st.session_state['start_machine']:
@@ -111,8 +120,10 @@ def create_classification_menu(model, alpha, b, X_train, y_train, gamma):
                     st.write("Preprocessing started!")
                     st.session_state['open_selected_image_zip'] = False
                     st.session_state['preprocessing'] = True
-                    cols_per_row = 7  
                     files = st.session_state['uploaded_files']
+                    cols_per_row = 7  
+                    total_files = len(files)
+                    progress_bar = st.progress(0)
                     
                     for i in range(0, len(files), cols_per_row):
                         cols = st.columns(cols_per_row)
@@ -120,22 +131,30 @@ def create_classification_menu(model, alpha, b, X_train, y_train, gamma):
                             with cols[j]:
                                 image = Image.open(file)
                                 image = np.array(image)
-                                gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-                                gray = cv2.resize(gray, (128, 128))
-                                gray = cv2.equalizeHist(gray)
-                                gray = cv2.GaussianBlur(gray, (3, 3), 0)
-                                st.image(gray)
-                                gray = gray.astype(np.float32) / 255.0
-                                gray = (gray * 255).astype(np.uint8)
+            
+                                # Pastikan gambar menjadi grayscale
+                                if len(image.shape) == 3:
+                                    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+                                
+                                # Resize ke 128x128
+                                image = cv2.resize(image, (128, 128))
 
-                                glcm = compute_glcm(gray)
-                                features = extract_glcm_features(glcm)
-                                st.write("Fitur GLCM:")
-                                st.write(", ".join([f"{v:.3f}" for v in features.flatten()]))
-                                features = features.reshape(1, -1)
-                                prediction = predict_svm_rbf(X_train, y_train, features, alpha, b, gamma)
-                                label = "Boot" if prediction[0] == 1 else "Not Boot"
+                                st.image(image)
+                                features = get_feat(image)
+                                # st.write(features)
+                                # predict = model.predict(features)
+                                # st.write(predict)
+                                features_scaled = scaler.transform([features])
+                                pred = model.predict(features_scaled)
+                                label = le.inverse_transform(pred)[0]
+                                # st.write(label)
+                                # st.write("Fitur GLCM:")
+                                # st.write(", ".join([f"{v:.3f}" for v in features.flatten()]))
+                                # features = features.reshape(1, -1)
                                 st.session_state['get_label'].append(label)
+                                processed_files = i + j + 1
+                                progress = int((processed_files / total_files) * 100)
+                                progress_bar.progress(progress)
     
     if st.session_state['preprocessing']:
         st.session_state['open_selected_image'] = False

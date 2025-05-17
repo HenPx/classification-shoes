@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 # from PIL import Image
-import cv2
+import cv2 as cv2
 from zipfile import ZipFile
 from io import BytesIO
 from utils.feat_glcm import get_feat

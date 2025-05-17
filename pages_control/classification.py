@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from PIL import Image
+# from PIL import Image
 import cv2
 from zipfile import ZipFile
 from io import BytesIO
@@ -68,7 +68,9 @@ def create_classification_menu(model, scaler, le):
                         cols = st.columns(cols_per_row)
                         for j, file in enumerate(files[i:i+cols_per_row]):
                             with cols[j]:
-                                image = Image.open(file)
+                                file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
+                                image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+                                # image = Image.open(file)
                                 # glcm = compute_glcm(image)
                                 image = np.array(image)
             
@@ -128,7 +130,9 @@ def create_classification_menu(model, scaler, le):
                         cols = st.columns(cols_per_row)
                         for j, file in enumerate(files[i:i+cols_per_row]):
                             with cols[j]:
-                                image = Image.open(file)
+                                file_bytes = np.asarray(bytearray(file.read()), dtype=np.uint8)
+                                image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+                                # image = Image.open(file)
                                 image = np.array(image)
             
                                 # Pastikan gambar menjadi grayscale

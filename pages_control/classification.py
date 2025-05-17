@@ -5,7 +5,6 @@ import cv2
 from zipfile import ZipFile
 from io import BytesIO
 from utils.feat_glcm import get_feat
-from utils.rbf_svm import predict_svm_rbf
 
 
 def extract_zip_to_state(zip_file):

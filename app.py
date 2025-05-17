@@ -40,7 +40,7 @@ def main():
     
     st.markdown("<h1 style='text-align: center;'>Klasifikasi Gambar SVM dan GLCM</h1>", unsafe_allow_html=True)
     # center title with markdown
-    st.markdown("<p style='text-align: center;'>Aplikasi ini dibuat sepenuhnya oleh: NAMA_PEMBUAT</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center;'>Aplikasi ini dibuat sepenuhnya oleh: Kelompok 5 Kelas B</p>", unsafe_allow_html=True)
     st.markdown("<hr>", unsafe_allow_html=True)
     
     with st.sidebar:

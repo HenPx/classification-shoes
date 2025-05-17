@@ -1,5 +1,5 @@
 import streamlit as st
-from PIL import Image
+# from PIL import Image
 from plotly import graph_objs as go
 
 def create_home_menu():
@@ -34,16 +34,17 @@ def create_home_menu():
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        image_sandal = Image.open("images/sandal.jpg")
-        st.image(image_sandal, caption="Sandal", use_container_width=True)
+        
+        # image_sandal = Image.open("images/sandal.jpg")
+        st.image("images/sandal.jpg", caption="Sandal", use_container_width=True)
 
     with col2:
-        image_shoes = Image.open("images/shoe.jpg")
-        st.image(image_shoes, caption="Shoes", use_container_width=True)
+        # image_shoes = Image.open("images/shoe.jpg")
+        st.image("images/shoe.jpg", caption="Shoes", use_container_width=True)
 
     with col3:
-        image_boots = Image.open("images/boot.jpg")
-        st.image(image_boots, caption="Boots", use_container_width=True)
+        # image_boots = Image.open("images/boot.jpg")
+        st.image("images/boot.jpg", caption="Boots", use_container_width=True)
 
     st.markdown("""
     ✨ **Selamat menjelajahi aplikasi ini!** Jangan ragu untuk mencoba berbagai fitur dan lihat hasil klasifikasi dataset sepatu, boots, dan sandal.
